@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import type { TextInputProps } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -11,38 +11,31 @@ interface TextFieldProps extends TextInputProps {
   errorText?: string;
 }
 
-const BORDER_COLOR: Record<ValidationState, string> = {
-  valid: 'rgba(52, 211, 153, 0.4)',      // Soft emerald glass border
-  invalid: 'rgba(248, 113, 113, 0.4)',    // Soft rose glass border
-  idle: 'rgba(255, 255, 255, 0.08)',      // Translucent white border
-};
-
 export function TextField({ label, validationState = 'idle', errorText, style, onFocus, onBlur, secureTextEntry, ...props }: TextFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordHidden, setIsPasswordHidden] = useState(secureTextEntry);
 
-  const activeBorderColor = isFocused 
-    ? 'rgba(10, 132, 255, 0.5)' // iOS System Blue glow
-    : BORDER_COLOR[validationState];
+  const borderClasses = isFocused 
+    ? 'border-[#0A84FF]/50' 
+    : validationState === 'valid'
+      ? 'border-[#34D399]/40'
+      : validationState === 'invalid'
+        ? 'border-[#F87171]/40'
+        : 'border-white/8';
 
-  const activeBgColor = isFocused
-    ? 'rgba(255, 255, 255, 0.05)'
-    : 'rgba(255, 255, 255, 0.02)';
+  const bgClasses = isFocused
+    ? 'bg-white/5'
+    : 'bg-white/2';
+
+  const paddingRightClass = secureTextEntry ? 'pr-12' : 'pr-4';
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
-      <View style={styles.inputWrapper}>
+    <View className="mb-5">
+      <Text className="text-white/50 text-[13px] font-sans-semibold mb-2 tracking-[0.4px] uppercase">{label}</Text>
+      <View className="relative w-full">
         <TextInput
-          style={[
-            styles.input, 
-            { 
-              borderColor: activeBorderColor,
-              backgroundColor: activeBgColor,
-              paddingRight: secureTextEntry ? 48 : 16 // Room for the eye icon
-            }, 
-            style
-          ]}
+          className={`border rounded-[14px] pl-4 py-[15px] text-white text-base font-sans tracking-[0.3px] w-full ${borderClasses} ${bgClasses} ${paddingRightClass}`}
+          style={style}
           placeholderTextColor="rgba(255, 255, 255, 0.35)"
           onFocus={(e) => {
             setIsFocused(true);
@@ -57,7 +50,7 @@ export function TextField({ label, validationState = 'idle', errorText, style, o
         />
         {secureTextEntry && (
           <TouchableOpacity
-            style={styles.eyeButton}
+            className="absolute right-4 h-full justify-center items-center"
             onPress={() => setIsPasswordHidden(!isPasswordHidden)}
             activeOpacity={0.6}
           >
@@ -70,52 +63,8 @@ export function TextField({ label, validationState = 'idle', errorText, style, o
         )}
       </View>
       {validationState === 'invalid' && errorText && (
-        <Text style={styles.errorText}>{errorText}</Text>
+        <Text className="text-[#F87171] text-xs font-sans-medium mt-1.5 pl-1 tracking-[0.2px]">{errorText}</Text>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 20,
-  },
-  label: {
-    color: 'rgba(255, 255, 255, 0.5)',
-    fontSize: 13,
-    fontWeight: '600',
-    marginBottom: 8,
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-  },
-  inputWrapper: {
-    position: 'relative',
-    width: '100%',
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 14,
-    paddingLeft: 16,
-    paddingVertical: 15,
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '400',
-    letterSpacing: 0.3,
-    width: '100%',
-  },
-  eyeButton: {
-    position: 'absolute',
-    right: 16,
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorText: {
-    color: '#F87171',
-    fontSize: 12,
-    fontWeight: '500',
-    marginTop: 6,
-    paddingLeft: 4,
-    letterSpacing: 0.2,
-  },
-});

@@ -15,7 +15,7 @@ export default function ProtectedLayout() {
 
   if (isLoading || !token) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#0A0F1E', justifyContent: 'center', alignItems: 'center' }}>
+      <View className="flex-1 bg-[#0A0F1E] justify-center items-center">
         <ActivityIndicator size="large" color="#3B82F6" />
       </View>
     );

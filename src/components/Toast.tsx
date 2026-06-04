@@ -1,14 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Text, StyleSheet, View } from 'react-native';
+import { Animated, Text, View } from 'react-native';
 
 type ToastType = 'success' | 'error' | 'info';
-
-interface ToastConfig {
-  bg: string;
-  border: string;
-  text: string;
-  icon: string;
-}
 
 interface ToastProps {
   visible: boolean;
@@ -18,25 +11,10 @@ interface ToastProps {
   duration?: number;
 }
 
-const TOAST_STYLES: Record<ToastType, ToastConfig> = {
-  success: { 
-    bg: 'rgba(10, 35, 20, 0.85)', 
-    border: 'rgba(52, 211, 153, 0.25)', 
-    text: '#34D399', 
-    icon: '✓' 
-  },
-  error: { 
-    bg: 'rgba(45, 10, 10, 0.85)', 
-    border: 'rgba(248, 113, 113, 0.25)', 
-    text: '#F87171', 
-    icon: '✕' 
-  },
-  info: { 
-    bg: 'rgba(15, 23, 42, 0.85)', 
-    border: 'rgba(59, 130, 246, 0.25)', 
-    text: '#60A5FA', 
-    icon: 'ℹ' 
-  },
+const TOAST_ICONS: Record<ToastType, string> = {
+  success: '✓',
+  error: '✕',
+  info: 'ℹ',
 };
 
 export function Toast({ visible, message, type = 'success', onHide, duration = 2500 }: ToastProps) {
@@ -63,60 +41,41 @@ export function Toast({ visible, message, type = 'success', onHide, duration = 2
 
   if (!visible) return null;
 
-  const config = TOAST_STYLES[type];
+  const containerClasses = {
+    success: 'bg-[#0A2314]/85 border-[#34D399]/25',
+    error: 'bg-[#2D0A0A]/85 border-[#F87171]/25',
+    info: 'bg-[#0F172A]/85 border-[#3B82F6]/25',
+  }[type];
+
+  const borderClass = {
+    success: 'border-[#34D399]/25',
+    error: 'border-[#F87171]/25',
+    info: 'border-[#3B82F6]/25',
+  }[type];
+
+  const textClass = {
+    success: 'text-[#34D399]',
+    error: 'text-[#F87171]',
+    info: 'text-[#60A5FA]',
+  }[type];
+
+  const icon = TOAST_ICONS[type];
 
   return (
     <Animated.View
-      style={[
-        styles.container,
-        { backgroundColor: config.bg, borderColor: config.border },
-        { transform: [{ translateY }], opacity },
-      ]}
+      className={`absolute top-14 left-5 right-5 z-[999] flex-row items-center gap-3 px-4 py-3.5 rounded-[14px] border shadow-black elevation-8 ${containerClasses}`}
+      style={{
+        transform: [{ translateY }],
+        opacity,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      }}
     >
-      <View style={[styles.iconBadge, { borderColor: config.border, backgroundColor: 'rgba(255, 255, 255, 0.03)' }]}>
-        <Text style={[styles.icon, { color: config.text }]}>{config.icon}</Text>
+      <View className={`w-7 h-7 rounded-full border-[1.5px] justify-center items-center bg-white/3 ${borderClass}`}>
+        <Text className={`text-sm font-sans-bold ${textClass}`}>{icon}</Text>
       </View>
-      <Text style={[styles.message, { color: '#FFFFFF' }]}>{message}</Text>
+      <Text className="flex-1 text-sm font-sans-semibold text-white leading-5">{message}</Text>
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    top: 56,
-    left: 20,
-    right: 20,
-    zIndex: 999,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  iconBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  icon: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  message: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
-    lineHeight: 20,
-  },
-});

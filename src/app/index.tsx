@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAppAuth } from '@/navigation/AppNavigator';
 
@@ -18,17 +18,8 @@ export default function Index() {
   }, [token, isLoading]);
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-[#0A0F1E] justify-center items-center">
       <ActivityIndicator size="large" color="#3B82F6" />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0A0F1E',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});

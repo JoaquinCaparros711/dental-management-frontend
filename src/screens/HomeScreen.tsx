@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
@@ -30,156 +30,55 @@ export default function HomeScreen() {
 
   return (
     <ClinicalBackground>
-      <SafeAreaView style={styles.root}>
+      <SafeAreaView className="flex-1">
         <Toast
           visible={toast.visible}
           message={toast.message}
           type={toast.type}
           onHide={() => setToast((prev) => ({ ...prev, visible: false }))}
         />
-        <View style={styles.container}>
-          <View style={styles.topBar}>
-            <Text style={styles.logo}>🦷</Text>
-            <Text style={styles.appName}>OdontoGestión</Text>
+        <View className="flex-1 px-6 pt-6 pb-8 z-10">
+          <View className="flex-row items-center gap-2.5 mb-8">
+            <Text className="text-3xl">🦷</Text>
+            <Text className="text-2xl font-sans-bold text-white tracking-[0.4px]">OdontoGestión</Text>
           </View>
 
-          <View style={styles.welcomeCard}>
-            <Text style={styles.welcomeTitle}>¡Bienvenido al sistema!</Text>
-            <Text style={styles.welcomeSubtitle}>
+          <View
+            className="bg-white/[0.045] rounded-[24px] p-6 border-[1.5px] border-white/8 mb-4 shadow-black elevation-8"
+            style={{
+              shadowOffset: { width: 0, height: 12 },
+              shadowOpacity: 0.3,
+              shadowRadius: 16,
+            }}
+          >
+            <Text className="text-xl font-sans-bold text-white mb-2.5 tracking-[0.2px]">¡Bienvenido al sistema!</Text>
+            <Text className="text-sm text-white/55 leading-[22px] mb-4.5 font-sans">
               Autenticación JWT verificada correctamente. Tu sesión está activa y protegida.
             </Text>
-            <View style={styles.statusBadge}>
-              <View style={styles.statusDot} />
-              <Text style={styles.statusText}>Sesión activa</Text>
+            <View className="flex-row items-center gap-2 bg-emerald-500/10 rounded-[20px] px-3.5 py-1.5 self-start border border-emerald-500/25">
+              <View className="w-2 h-2 rounded-full bg-emerald-400" />
+              <Text className="text-emerald-400 text-[13px] font-sans-semibold">Sesión activa</Text>
             </View>
           </View>
 
-          <View style={styles.infoCard}>
-            <Text style={styles.infoCardTitle}>Panel Principal</Text>
-            <Text style={styles.infoCardText}>
+          <View className="bg-white/[0.025] rounded-[24px] p-6 border border-white/5">
+            <Text className="text-base font-sans-semibold text-white/70 mb-2.5">Panel Principal</Text>
+            <Text className="text-sm text-white/40 leading-[22px] font-sans">
               Las funcionalidades del sistema de gestión dental se integrarán aquí en las próximas User Stories del proyecto.
             </Text>
           </View>
 
-          <View style={styles.spacer} />
+          <View className="flex-1" />
 
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.85}>
-            <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
+          <TouchableOpacity
+            className="bg-red-500/8 rounded-2xl py-4 items-center border-[1.5px] border-red-500/25"
+            onPress={handleLogout}
+            activeOpacity={0.85}
+          >
+            <Text className="text-red-300 text-base font-sans-semibold tracking-[0.4px]">Cerrar Sesión</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
     </ClinicalBackground>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 32,
-    zIndex: 2,
-  },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 32,
-  },
-  logo: {
-    fontSize: 32,
-  },
-  appName: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: 0.4,
-  },
-  welcomeCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.045)',
-    borderRadius: 24,
-    padding: 24,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    marginBottom: 16,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  welcomeTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 10,
-    letterSpacing: 0.2,
-  },
-  welcomeSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.55)',
-    lineHeight: 22,
-    marginBottom: 18,
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.25)',
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#34D399',
-  },
-  statusText: {
-    color: '#34D399',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  infoCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.025)',
-    borderRadius: 24,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  infoCardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.7)',
-    marginBottom: 10,
-  },
-  infoCardText: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.4)',
-    lineHeight: 22,
-  },
-  spacer: {
-    flex: 1,
-  },
-  logoutButton: {
-    backgroundColor: 'rgba(239, 68, 68, 0.08)',
-    borderRadius: 16,
-    paddingVertical: 16,
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(239, 68, 68, 0.25)',
-  },
-  logoutButtonText: {
-    color: '#FCA5A5',
-    fontSize: 16,
-    fontWeight: '600',
-    letterSpacing: 0.4,
-  },
-});
