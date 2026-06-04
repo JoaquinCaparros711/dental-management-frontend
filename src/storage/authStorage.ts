@@ -37,6 +37,51 @@ export async function removeToken(): Promise<void> {
   await SecureStore.deleteItemAsync(TOKEN_KEY);
 }
 
+const FIRST_NAME_KEY = 'auth_first_name';
+const LAST_NAME_KEY = 'auth_last_name';
+
+export async function saveUserName(firstName: string, lastName: string): Promise<void> {
+  const storage = getWebStorage();
+  if (Platform.OS === 'web') {
+    if (storage) {
+      storage.setItem(FIRST_NAME_KEY, firstName);
+      storage.setItem(LAST_NAME_KEY, lastName);
+    }
+    return;
+  }
+  await SecureStore.setItemAsync(FIRST_NAME_KEY, firstName);
+  await SecureStore.setItemAsync(LAST_NAME_KEY, lastName);
+}
+
+export async function getUserName(): Promise<{ firstName: string | null; lastName: string | null }> {
+  const storage = getWebStorage();
+  if (Platform.OS === 'web') {
+    if (storage) {
+      return {
+        firstName: storage.getItem(FIRST_NAME_KEY),
+        lastName: storage.getItem(LAST_NAME_KEY),
+      };
+    }
+    return { firstName: null, lastName: null };
+  }
+  const firstName = await SecureStore.getItemAsync(FIRST_NAME_KEY);
+  const lastName = await SecureStore.getItemAsync(LAST_NAME_KEY);
+  return { firstName, lastName };
+}
+
+export async function removeUserName(): Promise<void> {
+  const storage = getWebStorage();
+  if (Platform.OS === 'web') {
+    if (storage) {
+      storage.removeItem(FIRST_NAME_KEY);
+      storage.removeItem(LAST_NAME_KEY);
+    }
+    return;
+  }
+  await SecureStore.deleteItemAsync(FIRST_NAME_KEY);
+  await SecureStore.deleteItemAsync(LAST_NAME_KEY);
+}
+
 const TOAST_KEY = 'pending_toast_message';
 let nativePendingToast: string | null = null;
 

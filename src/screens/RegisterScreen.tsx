@@ -14,7 +14,7 @@ import * as Haptics from 'expo-haptics';
 import { TextField } from '@/components/TextField';
 import { Toast } from '@/components/Toast';
 import { useRegister } from '@/hooks/useAuth';
-import { saveToken, savePendingToast, getPendingToast } from '@/storage/authStorage';
+import { saveToken, savePendingToast, getPendingToast, saveUserName } from '@/storage/authStorage';
 import { useAppAuth } from '@/navigation/AppNavigator';
 import { ClinicalBackground } from '@/components/ClinicalBackground';
 
@@ -85,6 +85,7 @@ export default function RegisterScreen() {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           await savePendingToast('¡Cuenta creada exitosamente!');
           await saveToken(data.token);
+          await saveUserName(firstName, lastName);
           setToken(data.token);
         },
         onError: () => {
