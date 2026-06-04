@@ -13,7 +13,7 @@ interface TextFieldProps extends TextInputProps {
 
 export function TextField({ label, validationState = 'idle', errorText, style, onFocus, onBlur, secureTextEntry, ...props }: TextFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const [isPasswordHidden, setIsPasswordHidden] = useState(secureTextEntry);
+  const [isPasswordHidden, setIsPasswordHidden] = useState<boolean>(!!secureTextEntry);
 
   const borderClasses = isFocused 
     ? 'border-[#0A84FF]/50' 

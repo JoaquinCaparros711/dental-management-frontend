@@ -5,7 +5,7 @@ const path = require('path');
 const config = getDefaultConfig(__dirname);
 
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  if (moduleName === 'axios') {
+  if (moduleName === 'axios' && platform === 'web') {
     return {
       filePath: path.resolve(__dirname, 'node_modules/axios/dist/browser/axios.cjs'),
       type: 'sourceFile',
