@@ -14,7 +14,7 @@ import * as Haptics from 'expo-haptics';
 import { TextField } from '@/components/TextField';
 import { Toast } from '@/components/Toast';
 import { useLogin } from '@/hooks/useAuth';
-import { saveToken, savePendingToast, getPendingToast } from '@/storage/authStorage';
+import { saveToken, savePendingToast, getPendingToast, saveUserName } from '@/storage/authStorage';
 import { useAppAuth } from '@/navigation/AppNavigator';
 import { ClinicalBackground } from '@/components/ClinicalBackground';
 
@@ -50,6 +50,7 @@ export default function LoginScreen() {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           await savePendingToast('¡Inicio de sesión exitoso!');
           await saveToken(data.token);
+          await saveUserName(data.firstName, data.lastName);
           setToken(data.token);
         },
         onError: () => {
