@@ -164,8 +164,8 @@ const { data: patients, isLoading, isFetching, refetch } = usePatients(debounced
                 </Text>
               </View>
             )}
-            onRefresh={refetch}
-            refreshing={isLoading}
+            onRefresh={() => refetch()}
+            refreshing={isFetching && !isLoading}
           />
         )}
       </SafeAreaView>
