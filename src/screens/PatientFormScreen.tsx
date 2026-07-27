@@ -26,7 +26,7 @@ export default function PatientFormScreen() {
 
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' });
 
-  const { data: patient, isLoading: isLoadingPatient } = usePatient(Number(id));
+  const { data: patient, isLoading: isLoadingPatient } = usePatient(patientId);
 
   const createMutation = useCreatePatient();
   const updateMutation = useUpdatePatient();
