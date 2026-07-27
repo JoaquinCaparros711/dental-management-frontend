@@ -291,7 +291,7 @@ export default function PatientFormScreen() {
               {isMutating ? (
                 <ActivityIndicator size="small" color="white" />
               ) : (
-                <View className="flex-row items-center gap-2">
+                <View className="flex-row items-center gap-2 p-4">
                   <Ionicons
                     name={isEditing ? 'save-outline' : 'person-add-outline'}
                     size={19}
