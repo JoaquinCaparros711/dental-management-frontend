@@ -13,7 +13,9 @@ import { savePendingToast } from '@/storage/authStorage';
 export default function PatientFormScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id?: string }>();
-  const isEditing = !!id;
+  const parsedId = id ? Number(id) : NaN;
+  const patientId = Number.isFinite(parsedId) ? parsedId : 0;
+  const isEditing = patientId > 0;
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
