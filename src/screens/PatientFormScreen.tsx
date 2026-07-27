@@ -133,7 +133,7 @@ export default function PatientFormScreen() {
 
     if (isEditing) {
       updateMutation.mutate(
-        { id: Number(id), data: requestData },
+        { id: patientId, data: requestData },
         {
           onSuccess: async () => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
