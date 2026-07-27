@@ -34,7 +34,7 @@ export default function PatientDirectoryScreen() {
     return () => clearTimeout(handler);
   }, [search]);
 
-  const { data: patients, isLoading, refetch } = usePatients(debouncedSearch);
+const { data: patients, isLoading, isFetching, refetch } = usePatients(debouncedSearch);
   const deleteMutation = useDeletePatient();
 
   const handleEdit = (patient: Patient) => {
