@@ -8,12 +8,27 @@ import { useAppAuth } from '@/navigation/AppNavigator';
 import { Toast } from '@/components/Toast';
 import { ClinicalBackground } from '@/components/ClinicalBackground';
 import { Ionicons } from '@expo/vector-icons';
+import { usePatients } from '@/hooks/usePatients';
+import { useAppointments } from '@/hooks/useAppointments';
+
+const getTodayIsoDate = () => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 export default function HomeScreen() {
   const router = useRouter();
   const { setToken } = useAppAuth();
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' | 'info' });
   const [userName, setUserName] = useState('Odontólogo');
+  const today = getTodayIsoDate();
+  const { data: patients } = usePatients();
+  const { data: todayAppointments } = useAppointments(today);
+  const activePatientsCount = patients?.length ?? 0;
+  const todayAppointmentsCount = todayAppointments?.length ?? 0;
 
   useEffect(() => {
     getPendingToast().then((message) => {
@@ -40,6 +55,11 @@ export default function HomeScreen() {
   const handleNavigatePatients = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push('/(protected)/patients');
+  }, [router]);
+
+  const handleNavigateAppointments = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push('/(protected)/appointments');
   }, [router]);
 
   const handleLockedAction = useCallback(() => {
@@ -91,12 +111,12 @@ export default function HomeScreen() {
             <View className="flex-row justify-between gap-3 mb-6">
               <View className="flex-1 bg-white/[0.025] border border-white/5 rounded-[22px] p-4 items-center">
                 <Text className="text-2xl mb-1">👥</Text>
-                <Text className="text-white text-base font-sans-bold">Activos</Text>
+                <Text className="text-white text-base font-sans-bold">{activePatientsCount}</Text>
                 <Text className="text-white/40 text-xs mt-0.5">Pacientes</Text>
               </View>
               <View className="flex-1 bg-white/[0.025] border border-white/5 rounded-[22px] p-4 items-center">
                 <Text className="text-2xl mb-1">📅</Text>
-                <Text className="text-white text-base font-sans-bold">Hoy</Text>
+                <Text className="text-white text-base font-sans-bold">{todayAppointmentsCount}</Text>
                 <Text className="text-white/40 text-xs mt-0.5">Turnos</Text>
               </View>
               <View className="flex-1 bg-white/[0.025] border border-white/5 rounded-[22px] p-4 items-center">
@@ -127,20 +147,20 @@ export default function HomeScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="bg-white/[0.015] rounded-[24px] p-4.5 flex-row items-center justify-between border border-white/5 opacity-55"
-                onPress={handleLockedAction}
-                activeOpacity={0.9}
+                className="bg-purple-500/10 rounded-[24px] p-4.5 flex-row items-center justify-between border border-purple-400/30"
+                onPress={handleNavigateAppointments}
+                activeOpacity={0.8}
               >
                 <View className="flex-row items-center gap-4">
-                  <View className="w-12 h-12 rounded-2xl bg-white/5 justify-center items-center border border-white/5">
-                    <Ionicons name="calendar-outline" size={24} color="rgba(255,255,255,0.4)" />
+                  <View className="w-12 h-12 rounded-2xl bg-purple-500/15 justify-center items-center border border-purple-400/25">
+                    <Ionicons name="calendar-outline" size={24} color="#C4B5FD" />
                   </View>
                   <View>
-                    <Text className="text-white/60 text-base font-sans-bold">Agenda y Citas</Text>
-                    <Text className="text-white/30 text-xs mt-1">Control horario y turnos</Text>
+                    <Text className="text-white text-base font-sans-bold">Agenda y Citas</Text>
+                    <Text className="text-white/45 text-xs mt-1">Vista diaria y semanal interactiva</Text>
                   </View>
                 </View>
-                <Ionicons name="lock-closed-outline" size={16} color="rgba(255, 255, 255, 0.25)" />
+                <Ionicons name="chevron-forward" size={18} color="rgba(255, 255, 255, 0.35)" />
               </TouchableOpacity>
 
               <TouchableOpacity
