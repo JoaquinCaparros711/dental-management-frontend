@@ -84,6 +84,7 @@ export default function AppointmentFormScreen() {
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [reason, setReason] = useState('');
+  const [clinicalNotes, setClinicalNotes] = useState('');
   const [status, setStatus] = useState<FormStatus>('SCHEDULED');
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' });
 
@@ -99,9 +100,18 @@ export default function AppointmentFormScreen() {
     setAppointmentDate(isoToDisplayDate(appointment.startTime.slice(0, 10)));
     setStartTime(appointment.startTime.slice(11, 16));
     setEndTime(appointment.endTime.slice(11, 16));
-    setReason(appointment.reason ?? '');
+    const appointmentReason = appointment.reason ?? '';
+    setReason(appointmentReason);
+    setClinicalNotes(appointment.status === 'COMPLETED' ? appointmentReason : '');
     setStatus(appointment.status);
   }, [appointment]);
+
+  useEffect(() => {
+    if (status !== 'COMPLETED') return;
+    if (clinicalNotes.trim().length > 0) return;
+    if (reason.trim().length === 0) return;
+    setClinicalNotes(reason);
+  }, [status, clinicalNotes, reason]);
 
   const selectedPatient = useMemo(
     () => (patients ?? []).find((patient) => patient.id === patientId),
@@ -119,6 +129,7 @@ export default function AppointmentFormScreen() {
     buildDate(appointmentDate, startTime).getTime() < buildDate(appointmentDate, endTime).getTime();
 
   const isFormValid = isPatientValid && isDateValid && isStartTimeValid && isEndTimeValid && isRangeValid;
+  const isCompleted = status === 'COMPLETED';
 
   const handleBack = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -146,7 +157,7 @@ export default function AppointmentFormScreen() {
       patientId,
       startTime: `${displayDateToIso(appointmentDate)}T${startTime}:00`,
       endTime: `${displayDateToIso(appointmentDate)}T${endTime}:00`,
-      reason: reason.trim() || undefined,
+      reason: (status === 'COMPLETED' ? clinicalNotes : reason).trim() || undefined,
       status,
     };
 
@@ -328,8 +339,18 @@ export default function AppointmentFormScreen() {
               placeholder="Ej. Consulta de control"
               value={reason}
               onChangeText={setReason}
-              editable={!isMutating}
+              editable={!isMutating && !isCompleted}
             />
+
+            {isCompleted ? (
+              <TextField
+                label="Notas clínicas / tratamiento realizado"
+                placeholder="Opcional"
+                value={clinicalNotes}
+                onChangeText={setClinicalNotes}
+                editable={!isMutating}
+              />
+            ) : null}
 
             <View className="mb-5">
               <Text className="text-white/50 text-[13px] font-sans-semibold mb-2 tracking-[0.4px] uppercase">
