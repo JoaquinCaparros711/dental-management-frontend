@@ -5,10 +5,11 @@ import type { Patient } from '@/types/patient.types';
 interface PatientCardProps {
   patient: Patient;
   onEdit: (patient: Patient) => void;
+  onClinicalHistory: (patient: Patient) => void;
   onDelete: (id: number) => void;
 }
 
-export function PatientCard({ patient, onEdit, onDelete }: PatientCardProps) {
+export function PatientCard({ patient, onEdit, onClinicalHistory, onDelete }: PatientCardProps) {
   const formattedBirthDate = patient.birthDate
     ? patient.birthDate.split('-').reverse().join('/')
     : '';
@@ -25,6 +26,13 @@ export function PatientCard({ patient, onEdit, onDelete }: PatientCardProps) {
           </View>
         </View>
         <View className="flex-row gap-2">
+          <TouchableOpacity
+            className="w-10 h-10 bg-sky-500/10 rounded-full items-center justify-center border border-sky-500/25"
+            onPress={() => onClinicalHistory(patient)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="document-text-outline" size={18} color="#7DD3FC" />
+          </TouchableOpacity>
           <TouchableOpacity
             className="w-10 h-10 bg-white/5 rounded-full items-center justify-center border border-white/10"
             onPress={() => onEdit(patient)}

@@ -34,7 +34,7 @@ export default function PatientDirectoryScreen() {
     return () => clearTimeout(handler);
   }, [search]);
 
-const { data: patients, isLoading, isFetching, refetch } = usePatients(debouncedSearch);
+  const { data: patients, isLoading, isFetching, refetch } = usePatients(debouncedSearch);
   const deleteMutation = useDeletePatient();
 
   const handleEdit = (patient: Patient) => {
@@ -42,6 +42,14 @@ const { data: patients, isLoading, isFetching, refetch } = usePatients(debounced
     router.push({
       pathname: '/(protected)/patient-form',
       params: { id: patient.id },
+    });
+  };
+
+  const handleClinicalHistory = (patient: Patient) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push({
+      pathname: '/(protected)/patient-clinical-history',
+      params: { id: patient.id, name: `${patient.firstName} ${patient.lastName}` },
     });
   };
 
@@ -147,6 +155,7 @@ const { data: patients, isLoading, isFetching, refetch } = usePatients(debounced
               <PatientCard
                 patient={item}
                 onEdit={handleEdit}
+                onClinicalHistory={handleClinicalHistory}
                 onDelete={handleDelete}
               />
             )}

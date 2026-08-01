@@ -198,6 +198,25 @@ export default function PatientFormScreen() {
           </Text>
         </View>
 
+        {isEditing ? (
+          <View className="px-6 pt-4">
+            <TouchableOpacity
+              className="bg-sky-500/10 border border-sky-400/30 rounded-2xl px-4 py-3 flex-row items-center justify-center gap-2"
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push({
+                  pathname: '/(protected)/patient-clinical-history',
+                  params: { id: patientId, name: `${firstName} ${lastName}`.trim() || 'Paciente' },
+                });
+              }}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="document-text-outline" size={18} color="#7DD3FC" />
+              <Text className="text-sky-200 font-sans-semibold">Ver Historial Clínico</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
         {isEditing && isLoadingPatient ? (
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="large" color="#3B82F6" />
