@@ -339,7 +339,7 @@ export default function AppointmentFormScreen() {
               placeholder="Ej. Consulta de control"
               value={reason}
               onChangeText={setReason}
-              editable={!isMutating}
+              editable={!isMutating && !isCompleted}
             />
 
             {isCompleted ? (
