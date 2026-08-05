@@ -1,12 +1,15 @@
-import type { AppointmentStatus } from '@/types/appointment.types';
-
 export interface ClinicalHistoryEntry {
   id: number;
   patientId: number;
-  appointmentId: number;
-  startTime: string;
-  endTime: string;
-  status: AppointmentStatus;
-  clinicalNotes?: string;
+  patientFirstName?: string;
+  patientLastName?: string;
+  appointmentId?: number | null;
+  dentistId: number;
+  notes: string;
+  createdAt: string;
 }
 
+export interface CreateClinicalRecordRequest {
+  notes: string;
+  appointmentId?: number;
+}
