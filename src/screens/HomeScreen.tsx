@@ -84,7 +84,6 @@ export default function HomeScreen() {
           <View className="px-6 pt-6 z-10">
             <View className="flex-row justify-between items-center mb-8">
               <View className="flex-row items-center gap-2.5">
-                <Text className="text-3xl">🦷</Text>
                 <Text className="text-2xl font-sans-bold text-white tracking-[0.4px]">OdontoGestión</Text>
               </View>
               <View className="flex-row items-center gap-1.5 bg-emerald-500/10 rounded-full px-3 py-1 border border-emerald-500/20">
@@ -110,17 +109,23 @@ export default function HomeScreen() {
 
             <View className="flex-row justify-between gap-3 mb-6">
               <View className="flex-1 bg-white/[0.025] border border-white/5 rounded-[22px] p-4 items-center">
-                <Text className="text-2xl mb-1">👥</Text>
+                <View className="mb-1.5">
+                  <Ionicons name="people-outline" size={24} color="#60A5FA" />
+                </View>
                 <Text className="text-white text-base font-sans-bold">{activePatientsCount}</Text>
                 <Text className="text-white/40 text-xs mt-0.5">Pacientes</Text>
               </View>
               <View className="flex-1 bg-white/[0.025] border border-white/5 rounded-[22px] p-4 items-center">
-                <Text className="text-2xl mb-1">📅</Text>
+                <View className="mb-1.5">
+                  <Ionicons name="calendar-outline" size={24} color="#C4B5FD" />
+                </View>
                 <Text className="text-white text-base font-sans-bold">{todayAppointmentsCount}</Text>
                 <Text className="text-white/40 text-xs mt-0.5">Turnos</Text>
               </View>
               <View className="flex-1 bg-white/[0.025] border border-white/5 rounded-[22px] p-4 items-center">
-                <Text className="text-2xl mb-1">📈</Text>
+                <View className="mb-1.5">
+                  <Ionicons name="trending-up-outline" size={24} color="#34D399" />
+                </View>
                 <Text className="text-white text-base font-sans-bold">Control</Text>
                 <Text className="text-white/40 text-xs mt-0.5">Finanzas</Text>
               </View>
@@ -139,8 +144,7 @@ export default function HomeScreen() {
                     <Ionicons name="people-outline" size={24} color="#60A5FA" />
                   </View>
                   <View>
-                    <Text className="text-white text-base font-sans-bold">Directorio de Pacientes</Text>
-                    <Text className="text-white/45 text-xs mt-1">Altas, consultas y expedientes</Text>
+                    <Text className="text-white text-base font-sans-bold">Pacientes</Text>
                   </View>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color="rgba(255, 255, 255, 0.35)" />
@@ -157,7 +161,6 @@ export default function HomeScreen() {
                   </View>
                   <View>
                     <Text className="text-white text-base font-sans-bold">Agenda y Citas</Text>
-                    <Text className="text-white/45 text-xs mt-1">Vista diaria y semanal interactiva</Text>
                   </View>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color="rgba(255, 255, 255, 0.35)" />

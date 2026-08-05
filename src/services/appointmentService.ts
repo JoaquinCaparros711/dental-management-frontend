@@ -35,3 +35,7 @@ export async function cancelAppointment(id: number): Promise<Appointment> {
   const response = await apiClient.patch<Appointment>(`/appointments/${id}/cancel`);
   return response.data;
 }
+
+export async function completeAppointment(id: number, notes?: string): Promise<void> {
+  await apiClient.patch(`/appointments/${id}/complete`, { notes });
+}

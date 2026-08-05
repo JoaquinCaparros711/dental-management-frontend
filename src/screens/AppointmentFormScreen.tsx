@@ -166,6 +166,14 @@ export default function AppointmentFormScreen() {
         { id: appointmentId, data: payload },
         {
           onSuccess: async () => {
+            if (status === 'COMPLETED') {
+              try {
+                const { completeAppointment } = await import('@/services/appointmentService');
+                await completeAppointment(appointmentId, clinicalNotes.trim());
+              } catch {
+                // Ignore if record already exists or handle silently
+              }
+            }
             await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             await savePendingToast('¡Cita actualizada con éxito!');
             if (router.canGoBack()) {

@@ -55,3 +55,16 @@ export function useCancelAppointment() {
     },
   });
 }
+
+export function useCompleteAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, notes }: { id: number; notes?: string }) =>
+      import('@/services/appointmentService').then((s) => s.completeAppointment(id, notes)),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['appointment', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['clinical-history'] });
+    },
+  });
+}
