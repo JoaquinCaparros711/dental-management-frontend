@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
-import { getToken } from '@/storage/authStorage';
+import { getToken, savePendingToast } from '@/storage/authStorage';
 import { handle401Unauthorized } from '@/navigation/AppNavigator';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL || Platform.select({
@@ -28,7 +28,8 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response && error.response.status === 401) {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      await savePendingToast('Tu sesión ha expirado. Por favor ingresa nuevamente.');
       handle401Unauthorized();
     }
     return Promise.reject(error);
