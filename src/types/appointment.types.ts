@@ -1,3 +1,5 @@
+import type { PaymentMethod, PaymentStatus } from './payment.types';
+
 export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
 
 export interface Appointment {
@@ -10,6 +12,11 @@ export interface Appointment {
   endTime: string;
   reason?: string;
   status: AppointmentStatus;
+  paymentStatus?: PaymentStatus;
+  paymentMethod?: PaymentMethod | null;
+  paymentDate?: string | null;
+  amount?: number;
+  paymentNotes?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -20,4 +27,8 @@ export interface AppointmentRequest {
   endTime: string;
   reason?: string;
   status?: AppointmentStatus;
+  amount?: number;
+  paymentStatus?: PaymentStatus;
+  paymentMethod?: PaymentMethod;
+  paymentNotes?: string;
 }

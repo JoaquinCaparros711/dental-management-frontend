@@ -62,6 +62,11 @@ export default function HomeScreen() {
     router.push('/(protected)/appointments');
   }, [router]);
 
+  const handleNavigateFinancial = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push('/(protected)/financial-control');
+  }, [router]);
+
   const handleLockedAction = useCallback(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     setToast({
@@ -167,20 +172,19 @@ export default function HomeScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="bg-white/[0.015] rounded-[24px] p-4.5 flex-row items-center justify-between border border-white/5 opacity-55"
-                onPress={handleLockedAction}
-                activeOpacity={0.9}
+                className="bg-emerald-500/10 rounded-[24px] p-4.5 flex-row items-center justify-between border border-emerald-500/25"
+                onPress={handleNavigateFinancial}
+                activeOpacity={0.8}
               >
                 <View className="flex-row items-center gap-4">
-                  <View className="w-12 h-12 rounded-2xl bg-white/5 justify-center items-center border border-white/5">
-                    <Ionicons name="cash-outline" size={24} color="rgba(255,255,255,0.4)" />
+                  <View className="w-12 h-12 rounded-2xl bg-emerald-500/15 justify-center items-center border border-emerald-500/20">
+                    <Ionicons name="cash-outline" size={24} color="#34D399" />
                   </View>
                   <View>
-                    <Text className="text-white/60 text-base font-sans-bold">Control Financiero</Text>
-                    <Text className="text-white/30 text-xs mt-1">Pagos, deudas y liquidación</Text>
+                    <Text className="text-white text-base font-sans-bold">Control Financiero</Text>
                   </View>
                 </View>
-                <Ionicons name="lock-closed-outline" size={16} color="rgba(255, 255, 255, 0.25)" />
+                <Ionicons name="chevron-forward" size={18} color="rgba(255, 255, 255, 0.35)" />
               </TouchableOpacity>
             </View>
 
