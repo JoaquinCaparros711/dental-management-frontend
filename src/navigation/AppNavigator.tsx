@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { getToken, removeToken } from '@/storage/authStorage';
+import { onUnauthorized } from '@/api/apiClient';
 
 interface AuthContextType {
   token: string | null;
@@ -14,18 +15,6 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
 });
 
-let logoutListener: (() => void) | null = null;
-
-export const setOn401Unauthorized = (callback: () => void) => {
-  logoutListener = callback;
-};
-
-export const handle401Unauthorized = () => {
-  if (logoutListener) {
-    logoutListener();
-  }
-};
-
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -35,18 +24,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     getToken().then((storedToken) => {
-      setToken(storedToken);
-      setIsLoading(false);
+      if (isMounted) {
+        setToken(storedToken);
+        setIsLoading(false);
+      }
     });
 
-    setOn401Unauthorized(async () => {
+    const unsubscribe = onUnauthorized(async () => {
       await removeToken();
-      setToken(null);
+      if (isMounted) {
+        setToken(null);
+      }
     });
 
     return () => {
-      setOn401Unauthorized(() => {});
+      isMounted = false;
+      unsubscribe();
     };
   }, []);
 
@@ -60,3 +56,4 @@ export function AuthProvider({ children }: AuthProviderProps) {
 export function useAppAuth(): AuthContextType {
   return useContext(AuthContext);
 }
+
