@@ -28,13 +28,59 @@ export async function saveToken(token: string): Promise<void> {
   }
 }
 
+export function isTokenExpired(token: string): boolean {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return true;
+    let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (base64.length % 4) {
+      base64 += '=';
+    }
+    const jsonPayload = decodeBase64(base64);
+    const payload = JSON.parse(jsonPayload);
+    if (!payload.exp) return false;
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+}
+
+function decodeBase64(str: string): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+  let output = '';
+  let buffer = 0;
+  let bits = 0;
+
+  for (let i = 0; i < str.length; i++) {
+    const c = str.charAt(i);
+    if (c === '=') break;
+    const index = chars.indexOf(c);
+    if (index === -1) continue;
+    buffer = (buffer << 6) | index;
+    bits += 6;
+    if (bits >= 8) {
+      bits -= 8;
+      output += String.fromCharCode((buffer >> bits) & 0xff);
+    }
+  }
+  return output;
+}
+
 export async function getToken(): Promise<string | null> {
   try {
     const storage = getWebStorage();
-    if (Platform.OS === 'web') {
-      return storage ? storage.getItem(TOKEN_KEY) : null;
+    const rawToken = Platform.OS === 'web'
+      ? (storage ? storage.getItem(TOKEN_KEY) : null)
+      : await SecureStore.getItemAsync(TOKEN_KEY);
+
+    if (rawToken && isTokenExpired(rawToken)) {
+      await removeToken();
+      await removeUserName();
+      await savePendingToast('Tu sesión ha expirado. Por favor ingresa nuevamente.');
+      return null;
     }
-    return await SecureStore.getItemAsync(TOKEN_KEY);
+
+    return rawToken;
   } catch (error) {
     console.error('Failed to read secure auth token:', error);
     return null;
@@ -141,4 +187,3 @@ export async function getPendingToast(): Promise<string | null> {
     return null;
   }
 }
-
