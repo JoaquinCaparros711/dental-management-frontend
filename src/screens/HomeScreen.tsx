@@ -10,6 +10,8 @@ import { ClinicalBackground } from '@/components/ClinicalBackground';
 import { Ionicons } from '@expo/vector-icons';
 import { usePatients } from '@/hooks/usePatients';
 import { useAppointments } from '@/hooks/useAppointments';
+import { useInAppNotifications } from '@/hooks/useInAppNotifications';
+import { NotificationModal } from '@/components/NotificationModal';
 
 const getTodayIsoDate = () => {
   const date = new Date();
@@ -24,9 +26,21 @@ export default function HomeScreen() {
   const { setToken } = useAppAuth();
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' | 'info' });
   const [userName, setUserName] = useState('Odontólogo');
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const today = getTodayIsoDate();
   const { data: patients } = usePatients();
   const { data: todayAppointments } = useAppointments(today);
+  const {
+    notifications,
+    unreadCount,
+    isLoading: isNotificationsLoading,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    clearReadNotifications,
+    triggerTestNotification,
+    isSendingTest,
+  } = useInAppNotifications();
   const activePatientsCount = patients?.length ?? 0;
   const todayAppointmentsCount = todayAppointments?.length ?? 0;
 
@@ -91,9 +105,45 @@ export default function HomeScreen() {
               <View className="flex-row items-center gap-2.5">
                 <Text className="text-2xl font-sans-bold text-white tracking-[0.4px]">OdontoGestión</Text>
               </View>
-              <View className="flex-row items-center gap-1.5 bg-emerald-500/10 rounded-full px-3 py-1 border border-emerald-500/20">
-                <View className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <Text className="text-emerald-400 text-xs font-sans-semibold">En línea</Text>
+              
+              <View className="flex-row items-center gap-3">
+                <TouchableOpacity
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setIsNotificationModalOpen(true);
+                  }}
+                  className="w-10 h-10 rounded-full bg-white/[0.05] items-center justify-center border border-white/10 relative"
+                  style={{
+                    shadowColor: unreadCount > 0 ? '#38BDF8' : '#000000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: unreadCount > 0 ? 0.4 : 0.2,
+                    shadowRadius: 8,
+                  }}
+                >
+                  <Ionicons
+                    name={unreadCount > 0 ? "notifications" : "notifications-outline"}
+                    size={20}
+                    color={unreadCount > 0 ? "#38BDF8" : "#94A3B8"}
+                  />
+                  {unreadCount > 0 && (
+                    <View
+                      className="absolute -top-1 -right-1 bg-sky-500 rounded-full px-1.5 py-0.5 min-w-[18px] items-center justify-center border-2 border-[#050E17]"
+                      style={{
+                        shadowColor: '#38BDF8',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.9,
+                        shadowRadius: 6,
+                      }}
+                    >
+                      <Text className="text-white text-[10px] font-sans-bold">{unreadCount > 9 ? '9+' : unreadCount}</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+
+                <View className="flex-row items-center gap-1.5 bg-emerald-500/10 rounded-full px-3 py-1 border border-emerald-500/20">
+                  <View className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <Text className="text-emerald-400 text-xs font-sans-semibold">En línea</Text>
+                </View>
               </View>
             </View>
 
@@ -197,6 +247,18 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
+        <NotificationModal
+          visible={isNotificationModalOpen}
+          onClose={() => setIsNotificationModalOpen(false)}
+          notifications={notifications}
+          isLoading={isNotificationsLoading}
+          onMarkAsRead={markAsRead}
+          onMarkAllAsRead={markAllAsRead}
+          onDeleteNotification={deleteNotification}
+          onClearReadNotifications={clearReadNotifications}
+          onSendTestNotification={triggerTestNotification}
+          isSendingTest={isSendingTest}
+        />
       </SafeAreaView>
     </ClinicalBackground>
   );
