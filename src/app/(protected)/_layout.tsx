@@ -2,10 +2,12 @@ import { Stack, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { useAppAuth } from '@/navigation/AppNavigator';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 
 export default function ProtectedLayout() {
   const { token, isLoading } = useAppAuth();
   const router = useRouter();
+  usePushNotifications();
 
   useEffect(() => {
     if (!isLoading && !token) {
