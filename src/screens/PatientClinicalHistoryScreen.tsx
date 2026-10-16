@@ -17,6 +17,7 @@ import * as Haptics from 'expo-haptics';
 import { ClinicalBackground } from '@/components/ClinicalBackground';
 import { Toast } from '@/components/Toast';
 import { usePatientClinicalHistory, useCreateClinicalRecord } from '@/hooks/useClinicalHistory';
+import { formatDateInput } from '@/utils/dateUtils';
 
 const formatDateTime = (iso: string) => {
   if (!iso) return { dateText: '', timeText: '' };
@@ -55,9 +56,45 @@ export default function PatientClinicalHistoryScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [notesInput, setNotesInput] = useState('');
   const [notesError, setNotesError] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+  const [activeQuickFilter, setActiveQuickFilter] = useState<'ALL' | 'TODAY' | 'THIS_MONTH' | 'CUSTOM'>('ALL');
 
   const { data, isLoading, isError, refetch, error } = usePatientClinicalHistory(patientId);
   const createMutation = useCreateClinicalRecord(patientId);
+
+  const filteredData = useMemo(() => {
+    if (!data) return [];
+    const filter = dateFilter.trim();
+    if (!filter && activeQuickFilter === 'ALL') return data;
+
+    const now = new Date();
+    const todayYear = now.getFullYear();
+    const todayMonth = `${now.getMonth() + 1}`.padStart(2, '0');
+    const todayDay = `${now.getDate()}`.padStart(2, '0');
+    const todayIso = `${todayYear}-${todayMonth}-${todayDay}`;
+    const thisMonthPrefix = `${todayYear}-${todayMonth}`;
+
+    if (activeQuickFilter === 'TODAY') {
+      return data.filter((entry) => entry.createdAt?.startsWith(todayIso));
+    }
+
+    if (activeQuickFilter === 'THIS_MONTH') {
+      return data.filter((entry) => entry.createdAt?.startsWith(thisMonthPrefix));
+    }
+
+    if (filter) {
+      const cleanFilter = filter.toLowerCase();
+      return data.filter((entry) => {
+        if (!entry.createdAt) return false;
+        const isoDate = entry.createdAt.slice(0, 10);
+        const [y, m, d] = isoDate.split('-');
+        const displayDate = `${d}/${m}/${y}`;
+        return displayDate.includes(cleanFilter) || isoDate.includes(cleanFilter);
+      });
+    }
+
+    return data;
+  }, [data, dateFilter, activeQuickFilter]);
 
   const errorMessage = useMemo(() => {
     const requestError = error as RequestError | null;
@@ -155,6 +192,120 @@ export default function PatientClinicalHistoryScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Date Filter Bar */}
+        {data && data.length > 0 ? (
+          <View className="px-6 pt-3 pb-1 z-10">
+            <View className="flex-row items-center bg-white/5 border border-white/10 rounded-2xl px-3.5 py-2">
+              <Ionicons name="calendar-outline" size={18} color="#60A5FA" />
+              <TextInput
+                className="flex-1 ml-2.5 text-white text-sm font-sans"
+                placeholder="Filtrar por fecha (DD/MM/AAAA)..."
+                placeholderTextColor="rgba(255, 255, 255, 0.35)"
+                value={dateFilter}
+                onChangeText={(val) => {
+                  setDateFilter(formatDateInput(val));
+                  setActiveQuickFilter('CUSTOM');
+                }}
+                keyboardType="numeric"
+                maxLength={10}
+              />
+              {dateFilter.length > 0 && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setDateFilter('');
+                    setActiveQuickFilter('ALL');
+                    Haptics.selectionAsync();
+                  }}
+                  className="p-1"
+                >
+                  <Ionicons name="close-circle" size={18} color="rgba(255, 255, 255, 0.45)" />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Quick Filter Chips */}
+            <View className="flex-row items-center gap-2 mt-2.5">
+              <TouchableOpacity
+                onPress={() => {
+                  setDateFilter('');
+                  setActiveQuickFilter('ALL');
+                  Haptics.selectionAsync();
+                }}
+                className={`px-3 py-1.5 rounded-xl border ${
+                  activeQuickFilter === 'ALL' && !dateFilter
+                    ? 'bg-blue-600/30 border-blue-400/50'
+                    : 'bg-white/5 border-white/10'
+                }`}
+              >
+                <Text
+                  className={`text-xs font-sans-semibold ${
+                    activeQuickFilter === 'ALL' && !dateFilter ? 'text-blue-200' : 'text-white/60'
+                  }`}
+                >
+                  Todas
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  const now = new Date();
+                  const d = `${now.getDate()}`.padStart(2, '0');
+                  const m = `${now.getMonth() + 1}`.padStart(2, '0');
+                  const y = now.getFullYear();
+                  setDateFilter(`${d}/${m}/${y}`);
+                  setActiveQuickFilter('TODAY');
+                  Haptics.selectionAsync();
+                }}
+                className={`px-3 py-1.5 rounded-xl border ${
+                  activeQuickFilter === 'TODAY'
+                    ? 'bg-blue-600/30 border-blue-400/50'
+                    : 'bg-white/5 border-white/10'
+                }`}
+              >
+                <Text
+                  className={`text-xs font-sans-semibold ${
+                    activeQuickFilter === 'TODAY' ? 'text-blue-200' : 'text-white/60'
+                  }`}
+                >
+                  Hoy
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  const now = new Date();
+                  const m = `${now.getMonth() + 1}`.padStart(2, '0');
+                  const y = now.getFullYear();
+                  setDateFilter(`${m}/${y}`);
+                  setActiveQuickFilter('THIS_MONTH');
+                  Haptics.selectionAsync();
+                }}
+                className={`px-3 py-1.5 rounded-xl border ${
+                  activeQuickFilter === 'THIS_MONTH'
+                    ? 'bg-blue-600/30 border-blue-400/50'
+                    : 'bg-white/5 border-white/10'
+                }`}
+              >
+                <Text
+                  className={`text-xs font-sans-semibold ${
+                    activeQuickFilter === 'THIS_MONTH' ? 'text-blue-200' : 'text-white/60'
+                  }`}
+                >
+                  Este mes
+                </Text>
+              </TouchableOpacity>
+
+              {dateFilter.length > 0 || activeQuickFilter !== 'ALL' ? (
+                <View className="ml-auto bg-white/[0.04] px-2.5 py-1 rounded-lg border border-white/10">
+                  <Text className="text-white/45 text-[11px] font-sans">
+                    {filteredData.length} de {data.length}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          </View>
+        ) : null}
+
         {isLoading ? (
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="large" color="#3B82F6" />
@@ -171,7 +322,7 @@ export default function PatientClinicalHistoryScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          <ScrollView className="flex-1 px-6 pt-6" contentContainerStyle={{ paddingBottom: 36 }}>
+          <ScrollView className="flex-1 px-6 pt-4" contentContainerStyle={{ paddingBottom: 36 }}>
             {!data || data.length === 0 ? (
               <View className="bg-white/[0.02] border border-dashed border-white/10 rounded-2xl py-12 items-center px-6">
                 <Text className="text-4xl mb-3">📝</Text>
@@ -186,9 +337,29 @@ export default function PatientClinicalHistoryScreen() {
                   <Text className="text-blue-200 text-sm font-sans-semibold">Registrar primera evolución</Text>
                 </TouchableOpacity>
               </View>
+            ) : filteredData.length === 0 ? (
+              <View className="bg-white/[0.02] border border-dashed border-white/10 rounded-2xl py-12 items-center px-6">
+                <Text className="text-4xl mb-3">🔍</Text>
+                <Text className="text-white/70 text-sm font-sans-semibold text-center mb-1">
+                  Sin evoluciones para la fecha seleccionada
+                </Text>
+                <Text className="text-white/40 text-xs font-sans text-center mb-4">
+                  No se encontraron registros que coincidan con "{dateFilter}".
+                </Text>
+                <TouchableOpacity
+                  className="bg-white/10 border border-white/15 px-4 py-2 rounded-xl"
+                  onPress={() => {
+                    setDateFilter('');
+                    setActiveQuickFilter('ALL');
+                    Haptics.selectionAsync();
+                  }}
+                >
+                  <Text className="text-white text-xs font-sans-semibold">Ver todas las evoluciones</Text>
+                </TouchableOpacity>
+              </View>
             ) : (
               <View className="gap-3">
-                {data.map((entry) => {
+                {filteredData.map((entry) => {
                   const { dateText, timeText } = formatDateTime(entry.createdAt);
                   const isAppointmentLinked = Boolean(entry.appointmentId);
 

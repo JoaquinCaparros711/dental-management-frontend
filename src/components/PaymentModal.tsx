@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import type { Appointment } from '@/types/appointment.types';
 import type { PaymentMethod, PaymentStatus } from '@/types/payment.types';
+import { formatAppointmentSlot } from '@/utils/dateUtils';
 
 interface PaymentModalProps {
   visible: boolean;
@@ -14,6 +15,7 @@ interface PaymentModalProps {
     paymentMethod?: PaymentMethod | null;
     amount?: number;
     paymentNotes?: string | null;
+    paymentDate?: string | null;
   }) => Promise<void>;
   isLoading?: boolean;
 }
@@ -62,6 +64,7 @@ export function PaymentModal({ visible, appointment, onClose, onConfirm, isLoadi
       paymentMethod: status === 'PAID' ? selectedMethod : null,
       amount: numericAmount,
       paymentNotes: notes.trim() || null,
+      paymentDate: status === 'PAID' ? appointment?.startTime : null,
     });
   };
 
@@ -71,12 +74,18 @@ export function PaymentModal({ visible, appointment, onClose, onConfirm, isLoadi
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View className="flex-1 bg-black/75 justify-center items-center px-5">
         <View className="w-full max-w-md bg-[#0F172A] rounded-3xl p-6 border border-white/10 shadow-2xl">
-          <View className="flex-row justify-between items-center mb-4">
-            <View>
+          <View className="flex-row justify-between items-start mb-4">
+            <View className="flex-1 pr-2">
               <Text className="text-white text-xl font-sans-bold">Registrar Pago</Text>
-              <Text className="text-white/50 text-xs mt-0.5">
+              <Text className="text-white/60 text-xs mt-0.5">
                 Paciente: {appointment.patientFirstName} {appointment.patientLastName}
               </Text>
+              <View className="flex-row items-center gap-1.5 mt-2 bg-blue-500/10 px-2.5 py-1 rounded-lg border border-blue-500/20 self-start">
+                <Ionicons name="calendar-outline" size={13} color="#60A5FA" />
+                <Text className="text-blue-300 text-xs font-sans-medium">
+                  Turno: {formatAppointmentSlot(appointment.startTime, appointment.endTime)}
+                </Text>
+              </View>
             </View>
             <TouchableOpacity onPress={onClose} className="w-8 h-8 rounded-full bg-white/10 justify-center items-center">
               <Ionicons name="close" size={20} color="#94A3B8" />
