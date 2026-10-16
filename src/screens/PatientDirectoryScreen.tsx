@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -53,8 +53,34 @@ export default function PatientDirectoryScreen() {
     });
   };
 
+  const executeDelete = (id: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setToast({ visible: true, message: 'Paciente eliminado correctamente', type: 'success' });
+      },
+      onError: (err: any) => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        const errMsg = err?.response?.data?.error || 'Error al eliminar el paciente';
+        setToast({ visible: true, message: errMsg, type: 'error' });
+      },
+    });
+  };
+
   const handleDelete = (id: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    if (Platform.OS === 'web') {
+      const confirmed = typeof window !== 'undefined'
+        ? window.confirm('¿Estás seguro de que deseas eliminar este paciente de tu lista?')
+        : true;
+      if (confirmed) {
+        executeDelete(id);
+      }
+      return;
+    }
+
     Alert.alert(
       'Eliminar Paciente',
       '¿Estás seguro de que deseas eliminar este paciente de tu lista?',
@@ -63,19 +89,7 @@ export default function PatientDirectoryScreen() {
         {
           text: 'Eliminar',
           style: 'destructive',
-          onPress: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            deleteMutation.mutate(id, {
-              onSuccess: () => {
-                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                setToast({ visible: true, message: 'Paciente eliminado correctamente', type: 'success' });
-              },
-              onError: () => {
-                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-                setToast({ visible: true, message: 'Error al eliminar el paciente', type: 'error' });
-              },
-            });
-          },
+          onPress: () => executeDelete(id),
         },
       ]
     );

@@ -177,44 +177,51 @@ export default function AppointmentCalendarScreen() {
           onNavigateRange={handleMoveRange}
         />
 
-        <View className="px-6">
-          {isFetching && !isLoading ? (
-            <View className="flex-row items-center gap-2 pb-3">
-              <ActivityIndicator size="small" color="#60A5FA" />
-              <Text className="text-white/55 text-xs font-sans">Actualizando agenda...</Text>
-            </View>
-          ) : null}
+        {mode === 'day' ? (
+          <View className="px-6">
+            {isFetching && !isLoading ? (
+              <View className="flex-row items-center gap-2 pb-3">
+                <ActivityIndicator size="small" color="#60A5FA" />
+                <Text className="text-white/55 text-xs font-sans">Actualizando agenda...</Text>
+              </View>
+            ) : null}
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 10, paddingBottom: 12 }}
-          >
-            {weekDays.map((day) => {
-              const isSelected = day.isoDate === selectedDate;
-              return (
-                <TouchableOpacity
-                  key={day.isoDate}
-                  className={`w-[78px] rounded-2xl py-3 border items-center ${
-                    isSelected ? 'bg-blue-500/20 border-blue-400/35' : 'bg-white/[0.02] border-white/10'
-                  }`}
-                  onPress={() => handleSelectDate(day.isoDate)}
-                  activeOpacity={0.8}
-                >
-                  <Text className={`text-xs font-sans-semibold ${isSelected ? 'text-blue-200' : 'text-white/60'}`}>
-                    {DAY_NAMES_ES[day.date.getDay()]}
-                  </Text>
-                  <Text className={`text-lg font-sans-bold mt-0.5 ${isSelected ? 'text-white' : 'text-white/75'}`}>
-                    {day.date.getDate()}
-                  </Text>
-                  <Text className={`text-[11px] mt-0.5 ${isSelected ? 'text-blue-100/80' : 'text-white/35'}`}>
-                    {day.count === 0 ? 'Sin turnos' : `${day.count} turno${day.count > 1 ? 's' : ''}`}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 10, paddingBottom: 12 }}
+            >
+              {weekDays.map((day) => {
+                const isSelected = day.isoDate === selectedDate;
+                return (
+                  <TouchableOpacity
+                    key={day.isoDate}
+                    className={`w-[78px] rounded-2xl py-3 border items-center ${
+                      isSelected ? 'bg-blue-500/20 border-blue-400/35' : 'bg-white/[0.02] border-white/10'
+                    }`}
+                    onPress={() => handleSelectDate(day.isoDate)}
+                    activeOpacity={0.8}
+                  >
+                    <Text className={`text-xs font-sans-semibold ${isSelected ? 'text-blue-200' : 'text-white/60'}`}>
+                      {DAY_NAMES_ES[day.date.getDay()]}
+                    </Text>
+                    <Text className={`text-lg font-sans-bold mt-0.5 ${isSelected ? 'text-white' : 'text-white/75'}`}>
+                      {day.date.getDate()}
+                    </Text>
+                    <Text className={`text-[11px] mt-0.5 ${isSelected ? 'text-blue-100/80' : 'text-white/35'}`}>
+                      {day.count === 0 ? 'Sin turnos' : `${day.count} turno${day.count > 1 ? 's' : ''}`}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        ) : isFetching && !isLoading ? (
+          <View className="flex-row items-center gap-2 px-6 pb-3">
+            <ActivityIndicator size="small" color="#60A5FA" />
+            <Text className="text-white/55 text-xs font-sans">Actualizando agenda...</Text>
+          </View>
+        ) : null}
 
         <ScrollView className="flex-1 px-6" contentContainerStyle={{ paddingBottom: 36 }}>
           <CalendarStatusSummary summary={statusSummary} />

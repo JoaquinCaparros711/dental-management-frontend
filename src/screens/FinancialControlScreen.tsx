@@ -11,6 +11,7 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useFinancialSummary, useUpdatePayment } from '@/hooks/useFinancialControl';
 import type { Appointment } from '@/types/appointment.types';
 import type { PaymentMethod, PaymentStatus } from '@/types/payment.types';
+import { formatAppointmentSlot } from '@/utils/dateUtils';
 
 const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   CASH: 'Efectivo',
@@ -43,6 +44,7 @@ export default function FinancialControlScreen() {
     paymentMethod?: PaymentMethod | null;
     amount?: number;
     paymentNotes?: string | null;
+    paymentDate?: string | null;
   }) => {
     if (!selectedAppointment) return;
 
@@ -225,6 +227,13 @@ export default function FinancialControlScreen() {
                             {statusLabel}
                           </Text>
                         </View>
+                      </View>
+
+                      <View className="flex-row items-center gap-1.5 mb-1.5">
+                        <Ionicons name="calendar-outline" size={13} color="#60A5FA" />
+                        <Text className="text-blue-200/90 text-xs font-sans-medium">
+                          {formatAppointmentSlot(app.startTime, app.endTime)}
+                        </Text>
                       </View>
 
                       {app.reason ? (

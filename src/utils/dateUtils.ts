@@ -95,3 +95,27 @@ export function normalizeTimeString(dateTimeString: string): string {
   if (!dateTimeString || dateTimeString.length < 16) return '';
   return dateTimeString.slice(11, 16);
 }
+
+/**
+ * Formats appointment start and end time into readable slot string: "DD/MM/YYYY • HH:mm - HH:mm hs".
+ */
+export function formatAppointmentSlot(startTime?: string, endTime?: string): string {
+  if (!startTime) return '';
+  const [year, month, day] = startTime.slice(0, 10).split('-');
+  const formattedDate = `${day}/${month}/${year}`;
+  const start = startTime.length >= 16 ? startTime.slice(11, 16) : '';
+  const end = endTime && endTime.length >= 16 ? endTime.slice(11, 16) : '';
+  return `${formattedDate}${start ? ` • ${start}${end ? ` - ${end}` : ''} hs` : ''}`;
+}
+
+/**
+ * Formats user typed numeric string into DD/MM/YYYY mask.
+ */
+export function formatDateInput(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
+

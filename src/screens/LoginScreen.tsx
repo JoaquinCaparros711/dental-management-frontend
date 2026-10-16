@@ -24,6 +24,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' | 'info' });
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const router = useRouter();
   const { setToken } = useAppAuth();
   const { mutate: login, isPending, error } = useLogin();
@@ -36,15 +37,24 @@ export default function LoginScreen() {
     });
   }, []);
 
-  const emailValidationState =
-    email.length === 0 ? 'idle' : EMAIL_REGEX.test(email) ? 'valid' : 'invalid';
+  const isEmailValid = EMAIL_REGEX.test(email.trim());
+  const emailValidationState = !attemptedSubmit
+    ? 'idle'
+    : isEmailValid
+      ? 'valid'
+      : 'invalid';
 
   const handleLogin = useCallback(() => {
-    // Tactile feedback on press
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setAttemptedSubmit(true);
+
+    if (!isEmailValid) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
 
     login(
-      { email, password },
+      { email: email.trim(), password },
       {
         onSuccess: async (data) => {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -58,15 +68,23 @@ export default function LoginScreen() {
         },
       }
     );
-  }, [email, password, login, setToken]);
+  }, [email, password, isEmailValid, login, setToken]);
 
   const handleHideToast = useCallback(() => {
     setToast((prev) => ({ ...prev, visible: false }));
   }, []);
 
+  const axiosError = error as AxiosError<{ error?: string }> | null;
+  const rawError = axiosError?.response?.data?.error;
+  const statusCode = axiosError?.response?.status;
+  const isAuthError =
+    statusCode === 401 ||
+    (typeof rawError === 'string' && rawError.toLowerCase().includes('credential'));
+
   const backendError = error
-    ? ((error as AxiosError<{ error: string }>).response?.data?.error ??
-      'Error al iniciar sesión. Intentá de nuevo.')
+    ? (isAuthError
+        ? 'Email o contraseña incorrecta'
+        : (rawError ?? 'Error al iniciar sesión. Intentá de nuevo.'))
     : null;
 
   const isSubmitDisabled = isPending || email.length === 0 || password.length === 0;

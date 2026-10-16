@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -80,6 +80,7 @@ export default function AppointmentFormScreen() {
 
   const [patientId, setPatientId] = useState<number | null>(null);
   const [showPatientOptions, setShowPatientOptions] = useState(false);
+  const [patientSearch, setPatientSearch] = useState('');
   const [appointmentDate, setAppointmentDate] = useState(isoToDisplayDate(defaultDate));
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
@@ -106,12 +107,17 @@ export default function AppointmentFormScreen() {
     setStatus(appointment.status);
   }, [appointment]);
 
-  useEffect(() => {
-    if (status !== 'COMPLETED') return;
-    if (clinicalNotes.trim().length > 0) return;
-    if (reason.trim().length === 0) return;
-    setClinicalNotes(reason);
-  }, [status, clinicalNotes, reason]);
+  const filteredPatients = useMemo(() => {
+    if (!patients) return [];
+    const query = patientSearch.trim().toLowerCase();
+    if (!query) return patients;
+    return patients.filter((patient) => {
+      const fullName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
+      const reverseFullName = `${patient.lastName} ${patient.firstName}`.toLowerCase();
+      const dni = patient.dni ? patient.dni.toLowerCase() : '';
+      return fullName.includes(query) || reverseFullName.includes(query) || dni.includes(query);
+    });
+  }, [patients, patientSearch]);
 
   const selectedPatient = useMemo(
     () => (patients ?? []).find((patient) => patient.id === patientId),
@@ -157,7 +163,7 @@ export default function AppointmentFormScreen() {
       patientId,
       startTime: `${displayDateToIso(appointmentDate)}T${startTime}:00`,
       endTime: `${displayDateToIso(appointmentDate)}T${endTime}:00`,
-      reason: (status === 'COMPLETED' ? clinicalNotes : reason).trim() || undefined,
+      reason: reason.trim() || undefined,
       status,
     };
 
@@ -274,23 +280,52 @@ export default function AppointmentFormScreen() {
               ) : null}
 
               {showPatientOptions ? (
-                <View className="mt-2 border border-white/10 rounded-[14px] bg-white/[0.03] max-h-[210px]">
-                  <ScrollView>
-                    {(patients ?? []).map((patient) => (
-                      <TouchableOpacity
-                        key={patient.id}
-                        className={`px-4 py-3 border-b border-white/5 ${patient.id === patientId ? 'bg-blue-500/20' : ''}`}
-                        onPress={() => {
-                          setPatientId(patient.id);
-                          setShowPatientOptions(false);
-                        }}
-                      >
-                        <Text className="text-white text-sm font-sans-semibold">
-                          {patient.firstName} {patient.lastName}
+                <View className="mt-2 border border-white/10 rounded-[14px] bg-white/[0.03] overflow-hidden">
+                  <View className="p-2 border-b border-white/10 bg-white/[0.02]">
+                    <View className="flex-row items-center bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+                      <Ionicons name="search" size={16} color="rgba(255, 255, 255, 0.45)" />
+                      <TextInput
+                        className="flex-1 ml-2 text-white text-sm font-sans"
+                        placeholder="Buscar por nombre, apellido o DNI..."
+                        placeholderTextColor="rgba(255, 255, 255, 0.35)"
+                        value={patientSearch}
+                        onChangeText={setPatientSearch}
+                        autoCorrect={false}
+                      />
+                      {patientSearch.length > 0 && (
+                        <TouchableOpacity onPress={() => setPatientSearch('')} className="p-1">
+                          <Ionicons name="close-circle" size={16} color="rgba(255, 255, 255, 0.45)" />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  </View>
+                  <ScrollView className="max-h-[210px]" keyboardShouldPersistTaps="handled">
+                    {filteredPatients.length === 0 ? (
+                      <View className="py-5 px-4 items-center">
+                        <Text className="text-white/40 text-xs font-sans text-center">
+                          {patientSearch.trim().length > 0
+                            ? `No se encontraron pacientes para "${patientSearch}"`
+                            : 'No hay pacientes registrados'}
                         </Text>
-                        <Text className="text-white/45 text-xs mt-0.5">DNI: {patient.dni}</Text>
-                      </TouchableOpacity>
-                    ))}
+                      </View>
+                    ) : (
+                      filteredPatients.map((patient) => (
+                        <TouchableOpacity
+                          key={patient.id}
+                          className={`px-4 py-3 border-b border-white/5 ${patient.id === patientId ? 'bg-blue-500/20' : ''}`}
+                          onPress={() => {
+                            setPatientId(patient.id);
+                            setShowPatientOptions(false);
+                            setPatientSearch('');
+                          }}
+                        >
+                          <Text className="text-white text-sm font-sans-semibold">
+                            {patient.firstName} {patient.lastName}
+                          </Text>
+                          <Text className="text-white/45 text-xs mt-0.5">DNI: {patient.dni}</Text>
+                        </TouchableOpacity>
+                      ))
+                    )}
                   </ScrollView>
                 </View>
               ) : null}
@@ -347,13 +382,13 @@ export default function AppointmentFormScreen() {
               placeholder="Ej. Consulta de control"
               value={reason}
               onChangeText={setReason}
-              editable={!isMutating && !isCompleted}
+              editable={!isMutating}
             />
 
             {isCompleted ? (
               <TextField
                 label="Notas clínicas / tratamiento realizado"
-                placeholder="Opcional"
+                placeholder="Detalle de tratamiento o notas de la consulta (opcional)"
                 value={clinicalNotes}
                 onChangeText={setClinicalNotes}
                 editable={!isMutating}
